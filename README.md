@@ -8,7 +8,8 @@ For images with uneven lighting, converting images to black and white with one t
 
 For such cases, we can use adaptive thresolding, which calculates the threshold for each pixel based on neighbouring pixels.
 
-![image](https://github.com/user-attachments/assets/0f36a085-ff53-4ab5-a887-e7ba62ce9ee6)
+![image](https://github.com/user-attachments/assets/a1ec094c-2d1a-41fe-89ae-c45fa0c32cac)
+
 
 The demo in this repo contains two implmentation to perform adaptive thresholding.
 
