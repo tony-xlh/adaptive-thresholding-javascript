@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive Thresholding</title>
+  <style>
+  .imageContainer {
+    overflow: auto;
+    max-width: 360px;
+  }
+
+  .imageContainer img{
+    width: 100%;
+  }
+
+  #imageHidden {
+    display: none;
+  }
+  </style>
+</head>
+<html>
+<body>
+  <div id="app">
+    <h2>Adaptive Thresholding</h2>
+    <button id="loadFileButton">Load a File</button>
+    <input style="display:none;" type="file" id="file" onchange="loadImageFromFile();" accept=".jpg,.jpeg,.png,.bmp" />
+    <label>
+      Block size:
+      <input type="text" id="blocksize" placeholder="Block size" value="31" />
+    </label>
+    <label>
+      Constant C:
+      <input type="text" id="constant" placeholder="Constant" value="10" />
+    </label>
+    <button id="processButton">Process</button>
+    <span id="status"></span>
+    <div class="imageContainer">
+      <img id="image"/>
+      <img id="imageHidden"/>
+    </div>
+  </div>
+  <script>
+    const cvs = document.createElement("canvas");
+
+    function updateStatus(info){
+      document.getElementById("status").innerText = info;
+    }
+
+    document.getElementById("loadFileButton").addEventListener("click",function(){
+      document.getElementById("file").click();
+    })
+
+    document.getElementById("processButton").addEventListener("click",function(){
+      process();
+    })
+
+    async function process(){
+      const blockSize = parseInt(document.getElementById("blocksize").value);
+      const C = parseInt(document.getElementById("constant").value);
+      updateStatus("Processing...");
+      await sleep(200);
+      const startTime = performance.now();
+      const image = document.getElementById("imageHidden");
+      cvs.width = image.naturalWidth;
+      cvs.height = image.naturalHeight;
+      const ctx = cvs.getContext("2d");
+      ctx.drawImage(image, 0, 0);
+      const newImageData = adaptiveThreshold(ctx.getImageData(0,0,cvs.width,cvs.height),blockSize,C);
+      ctx.putImageData(newImageData,0,0);
+      document.getElementById("image").src = cvs.toDataURL("image/jpeg");
+      const endTime = performance.now();
+      updateStatus("Done in " + (endTime - startTime) + "ms");
+    }
+
+    function sleep(time){
+      return new Promise(function(resolve){
+        setTimeout(resolve, time);
+      });
+    }
+
+    function adaptiveThreshold(imageData, blockSize, C) {
+      const width = imageData.width;
+      const height = imageData.height;
+      const data = imageData.data;
+      const output = new ImageData(width, height);
+      const outputData = output.data;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let sum = 0;
+          let count = 0;
+
+          //local mean
+          for (let dy = -blockSize; dy <= blockSize; dy++) {
+            for (let dx = -blockSize; dx <= blockSize; dx++) {
+              const nx = x + dx;
+              const ny = y + dy;
+              if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                const idx = (ny * width + nx) * 4;
+                sum += data[idx];
+                count++;
+              }
+            }
+          }
+
+          const threshold = (sum / count) - C;
+          const idx = (y * width + x) * 4;
+          const pixelValue = data[idx];
+
+          // binarize
+          outputData[idx] = outputData[idx + 1] = outputData[idx + 2] = pixelValue > threshold ? 255 : 0;
+          outputData[idx + 3] = 255; // Alpha channel
+        }
+      }
+      return output;
+    }
+
+
+    function loadImageFromFile(){
+      let fileInput = document.getElementById("file");
+      let files = fileInput.files;
+      if (files.length == 0) {
+        return;
+      }
+      let file = files[0];
+      fileReader = new FileReader();
+      fileReader.onload = function(e){
+        document.getElementById("image").src = e.target.result;
+        document.getElementById("imageHidden").src = e.target.result;
+      };
+      fileReader.onerror = function () {
+        console.warn('oops, something went wrong.');
+      };
+      fileReader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
