@@ -45,6 +45,7 @@
       <img id="image"/>
       <img id="imageHidden"/>
     </div>
+    <pre id="barcodeResult"></pre>
   </div>
   <script>
     let router;
@@ -133,9 +134,13 @@
     }
 
     async function readBarcodeAndShowBinaryImage(){
+      await updateRuntimeSettingsForDBR();
       const image = document.getElementById("imageHidden");
-      await router.capture(image,"ReadSingleBarcode");
-
+      const result = await router.capture(image,"ReadSingleBarcode");
+      console.log(result);
+      if (result.barcodeResultItems) {
+        document.getElementById("barcodeResult").innerText = result.barcodeResultItems[0].text;
+      }
     }
 
     function displayBinarizedImage(result){
@@ -219,6 +224,504 @@
         console.warn('oops, something went wrong.');
       };
       fileReader.readAsDataURL(file);
+    }
+
+    async function updateRuntimeSettingsForDBR(){
+      let template = `{
+    "BarcodeFormatSpecificationOptions": [
+        {
+            "AllModuleDeviation": 0,
+            "AustralianPostEncodingTable": "C",
+            "BarcodeAngleRangeArray": null,
+            "BarcodeBytesLengthRangeArray": null,
+            "BarcodeComplementModes": null,
+            "BarcodeFormatIds": [
+                "BF_PDF417",
+                "BF_QR_CODE",
+                "BF_DATAMATRIX",
+                "BF_AZTEC",
+                "BF_MICRO_QR",
+                "BF_MICRO_PDF417",
+                "BF_DOTCODE"
+            ],
+            "BarcodeHeightRangeArray": null,
+            "BarcodeTextLengthRangeArray": null,
+            "BarcodeTextRegExPattern": "",
+            "BarcodeWidthRangeArray": null,
+            "BarcodeZoneBarCountRangeArray": null,
+            "BarcodeZoneMinDistanceToImageBorders": 0,
+            "BaseBarcodeFormatSpecification": "bfs1",
+            "Code128Subset": "",
+            "DeformationResistingModes": null,
+            "EnableAddOnCode": 0,
+            "EnableDataMatrixECC000-140": 0,
+            "EnableQRCodeModel1": 0,
+            "FindUnevenModuleBarcode": 1,
+            "HeadModuleRatio": "",
+            "MSICodeCheckDigitCalculation": "MSICCDC_MOD_10",
+            "MinQuietZoneWidth": 4,
+            "MinRatioOfBarcodeZoneWidthToHeight": 0,
+            "MinResultConfidence": 30,
+            "MirrorMode": "MM_BOTH",
+            "ModuleSizeRangeArray": null,
+            "Name": "bfs1-single-barcode",
+            "PartitionModes": [
+                "PM_WHOLE_BARCODE",
+                "PM_ALIGNMENT_PARTITION"
+            ],
+            "PatchCodeSearchingMargins": {
+                "Bottom": 20,
+                "Left": 20,
+                "MeasuredByPercentage": 1,
+                "Right": 20,
+                "Top": 20
+            },
+            "RequireStartStopChars": 1,
+            "ReturnPartialBarcodeValue": 1,
+            "StandardFormat": "",
+            "TailModuleRatio": "",
+            "VerifyCheckDigit": 0
+        },
+        {
+            "AllModuleDeviation": 0,
+            "AustralianPostEncodingTable": "C",
+            "BarcodeAngleRangeArray": null,
+            "BarcodeBytesLengthRangeArray": null,
+            "BarcodeComplementModes": null,
+            "BarcodeFormatIds": [
+                "BF_ALL"
+            ],
+            "BarcodeHeightRangeArray": null,
+            "BarcodeTextLengthRangeArray": null,
+            "BarcodeTextRegExPattern": "",
+            "BarcodeWidthRangeArray": null,
+            "BarcodeZoneBarCountRangeArray": null,
+            "BarcodeZoneMinDistanceToImageBorders": 0,
+            "BaseBarcodeFormatSpecification": "bfs2",
+            "Code128Subset": "",
+            "DeformationResistingModes": null,
+            "EnableAddOnCode": 0,
+            "EnableDataMatrixECC000-140": 0,
+            "EnableQRCodeModel1": 0,
+            "FindUnevenModuleBarcode": 1,
+            "HeadModuleRatio": "",
+            "MSICodeCheckDigitCalculation": "MSICCDC_MOD_10",
+            "MinQuietZoneWidth": 4,
+            "MinRatioOfBarcodeZoneWidthToHeight": 0,
+            "MinResultConfidence": 30,
+            "MirrorMode": "MM_NORMAL",
+            "ModuleSizeRangeArray": null,
+            "Name": "bfs2-single-barcode",
+            "PartitionModes": [
+                "PM_WHOLE_BARCODE",
+                "PM_ALIGNMENT_PARTITION"
+            ],
+            "PatchCodeSearchingMargins": {
+                "Bottom": 20,
+                "Left": 20,
+                "MeasuredByPercentage": 1,
+                "Right": 20,
+                "Top": 20
+            },
+            "RequireStartStopChars": 1,
+            "ReturnPartialBarcodeValue": 1,
+            "StandardFormat": "",
+            "TailModuleRatio": "",
+            "VerifyCheckDigit": 0
+        },
+        {
+            "AllModuleDeviation": 0,
+            "AustralianPostEncodingTable": "C",
+            "BarcodeAngleRangeArray": null,
+            "BarcodeBytesLengthRangeArray": null,
+            "BarcodeComplementModes": null,
+            "BarcodeFormatIds": [
+                "BF_PDF417",
+                "BF_QR_CODE",
+                "BF_DATAMATRIX",
+                "BF_AZTEC",
+                "BF_MICRO_QR",
+                "BF_MICRO_PDF417",
+                "BF_DOTCODE"
+            ],
+            "BarcodeHeightRangeArray": null,
+            "BarcodeTextLengthRangeArray": null,
+            "BarcodeTextRegExPattern": "",
+            "BarcodeWidthRangeArray": null,
+            "BarcodeZoneBarCountRangeArray": null,
+            "BarcodeZoneMinDistanceToImageBorders": 0,
+            "BaseBarcodeFormatSpecification": "",
+            "Code128Subset": "",
+            "DeformationResistingModes": null,
+            "EnableAddOnCode": 0,
+            "EnableDataMatrixECC000-140": 0,
+            "EnableQRCodeModel1": 0,
+            "FindUnevenModuleBarcode": 1,
+            "HeadModuleRatio": "",
+            "MSICodeCheckDigitCalculation": "MSICCDC_MOD_10",
+            "MinQuietZoneWidth": 4,
+            "MinRatioOfBarcodeZoneWidthToHeight": 0,
+            "MinResultConfidence": 30,
+            "MirrorMode": "MM_BOTH",
+            "ModuleSizeRangeArray": null,
+            "Name": "bfs1",
+            "PartitionModes": [
+                "PM_WHOLE_BARCODE",
+                "PM_ALIGNMENT_PARTITION"
+            ],
+            "PatchCodeSearchingMargins": {
+                "Bottom": 20,
+                "Left": 20,
+                "MeasuredByPercentage": 1,
+                "Right": 20,
+                "Top": 20
+            },
+            "RequireStartStopChars": 1,
+            "ReturnPartialBarcodeValue": 1,
+            "StandardFormat": "",
+            "TailModuleRatio": "",
+            "VerifyCheckDigit": 0
+        },
+        {
+            "AllModuleDeviation": 0,
+            "AustralianPostEncodingTable": "C",
+            "BarcodeAngleRangeArray": null,
+            "BarcodeBytesLengthRangeArray": null,
+            "BarcodeComplementModes": null,
+            "BarcodeFormatIds": [
+                "BF_ALL"
+            ],
+            "BarcodeHeightRangeArray": null,
+            "BarcodeTextLengthRangeArray": null,
+            "BarcodeTextRegExPattern": "",
+            "BarcodeWidthRangeArray": null,
+            "BarcodeZoneBarCountRangeArray": null,
+            "BarcodeZoneMinDistanceToImageBorders": 0,
+            "BaseBarcodeFormatSpecification": "",
+            "Code128Subset": "",
+            "DeformationResistingModes": null,
+            "EnableAddOnCode": 0,
+            "EnableDataMatrixECC000-140": 0,
+            "EnableQRCodeModel1": 0,
+            "FindUnevenModuleBarcode": 1,
+            "HeadModuleRatio": "",
+            "MSICodeCheckDigitCalculation": "MSICCDC_MOD_10",
+            "MinQuietZoneWidth": 4,
+            "MinRatioOfBarcodeZoneWidthToHeight": 0,
+            "MinResultConfidence": 30,
+            "MirrorMode": "MM_NORMAL",
+            "ModuleSizeRangeArray": null,
+            "Name": "bfs2",
+            "PartitionModes": [
+                "PM_WHOLE_BARCODE",
+                "PM_ALIGNMENT_PARTITION"
+            ],
+            "PatchCodeSearchingMargins": {
+                "Bottom": 20,
+                "Left": 20,
+                "MeasuredByPercentage": 1,
+                "Right": 20,
+                "Top": 20
+            },
+            "RequireStartStopChars": 1,
+            "ReturnPartialBarcodeValue": 1,
+            "StandardFormat": "",
+            "TailModuleRatio": "",
+            "VerifyCheckDigit": 0
+        }
+    ],
+    "BarcodeReaderTaskSettingOptions": [
+        {
+            "BarcodeColourModes": null,
+            "BarcodeComplementModes": [
+                {
+                    "Mode": "BCM_SKIP"
+                }
+            ],
+            "BarcodeFormatIds": [
+                "BF_DEFAULT"
+            ],
+            "BarcodeFormatSpecificationNameArray": [
+                "bfs1-single-barcode",
+                "bfs2-single-barcode"
+            ],
+            "BaseBarcodeReaderTaskSettingName": "",
+            "DPMCodeReadingModes": [
+                {
+                    "BarcodeFormat": "BF_DATAMATRIX",
+                    "Mode": "DPMCRM_SKIP"
+                }
+            ],
+            "DeblurModes": [
+                {
+                    "Mode": "DM_BASED_ON_LOC_BIN"
+                },
+                {
+                    "Mode": "DM_THRESHOLD_BINARIZATION"
+                },
+                {
+                    "Mode": "DM_DEEP_ANALYSIS"
+                }
+            ],
+            "DeformationResistingModes": [
+                {
+                    "BinarizationMode": {
+                        "BinarizationThreshold": -1,
+                        "BlockSizeX": 0,
+                        "BlockSizeY": 0,
+                        "EnableFillBinaryVacancy": 1,
+                        "GrayscaleEnhancementModesIndex": -1,
+                        "Mode": "BM_LOCAL_BLOCK",
+                        "MorphOperation": "Close",
+                        "MorphOperationKernelSizeX": -1,
+                        "MorphOperationKernelSizeY": -1,
+                        "MorphShape": "Rectangle",
+                        "ThresholdCompensation": 10
+                    },
+                    "GrayscaleEnhancementMode": {
+                        "Mode": "GEM_AUTO",
+                        "Sensitivity": -1,
+                        "SharpenBlockSizeX": -1,
+                        "SharpenBlockSizeY": -1,
+                        "SmoothBlockSizeX": -1,
+                        "SmoothBlockSizeY": -1
+                    },
+                    "Level": 5,
+                    "Mode": "DRM_SKIP"
+                }
+            ],
+            "ExpectedBarcodesCount": 1,
+            "LineAssemblyMode": {
+                "Mode": "LAM_GENERAL",
+                "Sensitivity": 3
+            },
+            "LocalizationModes": [
+                {
+                    "ConfidenceThreshold": 60,
+                    "IsOneDStacked": 0,
+                    "Mode": "LM_SCAN_DIRECTLY",
+                    "ModuleSize": 0,
+                    "ScanDirection": 2,
+                    "ScanStride": 0
+                },
+                {
+                    "ConfidenceThreshold": 60,
+                    "IsOneDStacked": 0,
+                    "Mode": "LM_CONNECTED_BLOCKS",
+                    "ModuleSize": 0,
+                    "ScanDirection": 0,
+                    "ScanStride": 0
+                }
+            ],
+            "MaxThreadsInOneTask": 4,
+            "Name": "task-read-single-barcode",
+            "ReturnBarcodeZoneClarity": 0,
+            "SectionImageParameterArray": [
+                {
+                    "ContinueWhenPartialResultsGenerated": 1,
+                    "ImageParameterName": "ip-read-single-barcode",
+                    "Section": "ST_REGION_PREDETECTION"
+                },
+                {
+                    "ContinueWhenPartialResultsGenerated": 1,
+                    "ImageParameterName": "ip-read-single-barcode",
+                    "Section": "ST_BARCODE_LOCALIZATION"
+                },
+                {
+                    "ContinueWhenPartialResultsGenerated": 1,
+                    "ImageParameterName": "ip-read-single-barcode",
+                    "Section": "ST_BARCODE_DECODING"
+                }
+            ],
+            "ShortlineDetectionMode": {
+                "Mode": "SDM_GENERAL",
+                "Sensitivity": 3
+            },
+            "StartSection": "ST_REGION_PREDETECTION",
+            "TerminateSetting": {
+                "Section": "ST_NULL",
+                "Stage": "IRUT_NULL"
+            },
+            "TextResultOrderModes": [
+                {
+                    "Mode": "TROM_CONFIDENCE"
+                },
+                {
+                    "Mode": "TROM_POSITION"
+                },
+                {
+                    "Mode": "TROM_FORMAT"
+                }
+            ]
+        }
+    ],
+    "CaptureVisionTemplates": [
+        {
+            "ImageROIProcessingNameArray": [
+                "roi-read-single-barcode"
+            ],
+            "ImageSource": "",
+            "MaxParallelTasks": 4,
+            "MinImageCaptureInterval": 0,
+            "Name": "ReadSingleBarcode",
+            "OutputOriginalImage": 0,
+            "SemanticProcessingNameArray": null,
+            "Timeout": 10000
+        }
+    ],
+    "GlobalParameter": {
+        "MaxTotalImageDimension": 0
+    },
+    "ImageParameterOptions": [
+        {
+            "BaseImageParameterName": "",
+            "BinarizationModes": [
+                {
+                    "BinarizationThreshold": -1,
+                    "BlockSizeX": 27,
+                    "BlockSizeY": 27,
+                    "EnableFillBinaryVacancy": 0,
+                    "GrayscaleEnhancementModesIndex": -1,
+                    "Mode": "BM_LOCAL_BLOCK",
+                    "MorphOperation": "Close",
+                    "MorphOperationKernelSizeX": -1,
+                    "MorphOperationKernelSizeY": -1,
+                    "MorphShape": "Rectangle",
+                    "ThresholdCompensation": 10
+                }
+            ],
+            "ColourConversionModes": [
+                {
+                    "BlueChannelWeight": -1,
+                    "GreenChannelWeight": -1,
+                    "Mode": "CICM_GENERAL",
+                    "RedChannelWeight": -1,
+                    "ReferChannel": "H_CHANNEL"
+                }
+            ],
+            "GrayscaleEnhancementModes": [
+                {
+                    "Mode": "GEM_GENERAL",
+                    "Sensitivity": -1,
+                    "SharpenBlockSizeX": -1,
+                    "SharpenBlockSizeY": -1,
+                    "SmoothBlockSizeX": -1,
+                    "SmoothBlockSizeY": -1
+                }
+            ],
+            "GrayscaleTransformationModes": [
+                {
+                    "Mode": "GTM_ORIGINAL"
+                }
+            ],
+            "IfEraseTextZone": 1,
+            "Name": "ip-read-single-barcode",
+            "RegionPredetectionModes": [
+                {
+                    "AspectRatioRange": "[]",
+                    "FindAccurateBoundary": 0,
+                    "ForeAndBackgroundColours": "[]",
+                    "HeightRange": "[]",
+                    "ImageParameterName": "",
+                    "MeasuredByPercentage": 1,
+                    "MinImageDimension": 262144,
+                    "Mode": "RPM_GENERAL",
+                    "RelativeRegions": "[]",
+                    "Sensitivity": 1,
+                    "SpatialIndexBlockSize": 5,
+                    "WidthRange": "[]"
+                }
+            ],
+            "ScaleDownThreshold": 2300,
+            "ScaleUpModes": [
+                {
+                    "AcuteAngleWithXThreshold": -1,
+                    "LetterHeightThreshold": 0,
+                    "Mode": "SUM_AUTO",
+                    "ModuleSizeThreshold": 0,
+                    "TargetLetterHeight": 0,
+                    "TargetModuleSize": 0
+                }
+            ],
+            "TextDetectionMode": {
+                "CharHeightRange": [
+                    1,
+                    1000,
+                    1
+                ],
+                "Direction": "UNKNOWN",
+                "MaxSpacingInALine": -1,
+                "Mode": "TTDM_LINE",
+                "Sensitivity": 3,
+                "StringLengthRange": null
+            },
+            "TextureDetectionModes": [
+                {
+                    "Mode": "TDM_GENERAL_WIDTH_CONCENTRATION",
+                    "Sensitivity": 5
+                }
+            ]
+        }
+    ],
+    "TargetROIDefOptions": [
+        {
+            "BaseTargetROIDefName": "",
+            "Location": {
+                "Offset": {
+                    "FirstPoint": [
+                        0,
+                        0,
+                        1,
+                        1
+                    ],
+                    "FourthPoint": [
+                        0,
+                        100,
+                        1,
+                        1
+                    ],
+                    "MeasuredByPercentage": 1,
+                    "ReferenceObjectOriginIndex": 0,
+                    "ReferenceObjectType": "ROT_ATOMIC_OBJECT",
+                    "ReferenceXAxis": {
+                        "AxisType": "AT_MIDPOINT_EDGE",
+                        "EdgeIndex": 0,
+                        "LengthReference": "LR_X",
+                        "RotationAngle": 90
+                    },
+                    "ReferenceYAxis": {
+                        "AxisType": "AT_MIDPOINT_EDGE",
+                        "EdgeIndex": 1,
+                        "LengthReference": "LR_Y",
+                        "RotationAngle": 90
+                    },
+                    "SecondPoint": [
+                        100,
+                        0,
+                        1,
+                        1
+                    ],
+                    "ThirdPoint": [
+                        100,
+                        100,
+                        1,
+                        1
+                    ]
+                }
+            },
+            "Name": "roi-read-single-barcode",
+            "PauseFlag": 0,
+            "TaskSettingNameArray": [
+                "task-read-single-barcode"
+            ]
+        }
+    ]
+}`;
+      let runtimeSettings = JSON.parse(template);
+      runtimeSettings["ImageParameterOptions"][0]["BinarizationModes"][0]["BlockSizeX"] = parseInt(document.getElementById("blocksize").value);
+      runtimeSettings["ImageParameterOptions"][0]["BinarizationModes"][0]["BlockSizeY"] = parseInt(document.getElementById("blocksize").value);
+      runtimeSettings["ImageParameterOptions"][0]["BinarizationModes"][0]["ThresholdCompensation"] = parseInt(document.getElementById("constant").value);
+      await router.initSettings(runtimeSettings);
     }
   </script>
 </body>
