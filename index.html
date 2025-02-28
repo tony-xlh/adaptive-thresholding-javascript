@@ -32,15 +32,70 @@
       Constant C:
       <input type="text" id="constant" placeholder="Constant" value="10" />
     </label>
+    <label>
+      Method:
+      <select id="methodSelect">
+        <option value="canvas">Canvas</option>
+        <option value="Dynamsoft">Dynamsoft Barcode Reader</option>
+      </select>
+    </label>
     <button id="processButton">Process</button>
-    <span id="status"></span>
+    <div id="status"></div>
     <div class="imageContainer">
       <img id="image"/>
       <img id="imageHidden"/>
     </div>
   </div>
   <script>
+    let router;
     const cvs = document.createElement("canvas");
+    document.getElementById("methodSelect").addEventListener("change",function(){
+      if(this.value === "Dynamsoft"){
+        if (!router) {
+          initDynamsoft();
+        }
+      }
+    })
+
+    async function initDynamsoft() {
+      updateStatus("Initializing Dynamsoft Barcode Reader...");
+      await loadLibrary("https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@10.4.3100/dist/dbr.bundle.js","text/javascript");
+      Dynamsoft.License.LicenseManager.initLicense("DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9");
+      Dynamsoft.Core.CoreModule.loadWasm(["dbr"]);
+      router = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+      const intermediateResultReceiver = new Dynamsoft.CVR.IntermediateResultReceiver();
+      intermediateResultReceiver.onBinaryImageUnitReceived = (result, info) => {
+        displayBinarizedImage(result)
+      };
+      const intermediateResultManager = router.getIntermediateResultManager();
+      intermediateResultManager.addResultReceiver(intermediateResultReceiver);
+      updateStatus("Dynamsoft Barcode Reader initialized");
+    }
+
+    function loadLibrary(src,type,id,data){
+      return new Promise(function (resolve, reject) {
+        let scriptEle = document.createElement("script");
+        scriptEle.setAttribute("type", type);
+        scriptEle.setAttribute("src", src);
+        if (id) {
+          scriptEle.id = id;
+        }
+        if (data) {
+          for (let key in data) {
+            scriptEle.setAttribute(key, data[key]);
+          }
+        }
+        document.body.appendChild(scriptEle);
+        scriptEle.addEventListener("load", () => {
+          console.log(src+" loaded")
+          resolve(true);
+        });
+        scriptEle.addEventListener("error", (ev) => {
+          console.log("Error on loading "+src, ev);
+          reject(ev);
+        });
+      });
+    }
 
     function updateStatus(info){
       document.getElementById("status").innerText = info;
@@ -59,17 +114,49 @@
       const C = parseInt(document.getElementById("constant").value);
       updateStatus("Processing...");
       await sleep(200);
-      const startTime = performance.now();
       const image = document.getElementById("imageHidden");
-      cvs.width = image.naturalWidth;
-      cvs.height = image.naturalHeight;
-      const ctx = cvs.getContext("2d");
-      ctx.drawImage(image, 0, 0);
-      const newImageData = adaptiveThreshold(ctx.getImageData(0,0,cvs.width,cvs.height),blockSize,C);
-      ctx.putImageData(newImageData,0,0);
-      document.getElementById("image").src = cvs.toDataURL("image/jpeg");
+      const startTime = performance.now();
+      let methodSelect = document.getElementById("methodSelect");
+      if(methodSelect.value === "canvas"){
+        cvs.width = image.naturalWidth;
+        cvs.height = image.naturalHeight;
+        const ctx = cvs.getContext("2d");
+        ctx.drawImage(image, 0, 0);
+        const newImageData = adaptiveThreshold(ctx.getImageData(0,0,cvs.width,cvs.height),blockSize,C);
+        ctx.putImageData(newImageData,0,0);
+        document.getElementById("image").src = cvs.toDataURL("image/jpeg");
+      }else{
+        await readBarcodeAndShowBinaryImage();
+      }
       const endTime = performance.now();
       updateStatus("Done in " + (endTime - startTime) + "ms");
+    }
+
+    async function readBarcodeAndShowBinaryImage(){
+      const image = document.getElementById("imageHidden");
+      await router.capture(image,"ReadSingleBarcode");
+
+    }
+
+    function displayBinarizedImage(result){
+      const canvas = document.createElement("canvas");
+      canvas.width = result.imageData.width;
+      canvas.height = result.imageData.height;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "white";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      let index = 0;
+      for (var i = 0; i < pixels.length; i += 4) {
+        const value = result.imageData.bytes[index];
+        pixels[i] = 255 - value;
+        pixels[i + 1] = 255 - value;
+        pixels[i + 2] = 255 - value;
+        index = index + 1;
+      }
+      context.putImageData(imageData, 0, 0);
+      document.getElementById("image").src = canvas.toDataURL();
     }
 
     function sleep(time){
