@@ -11,7 +11,7 @@ For such cases, we can use adaptive thresolding, which calculates the threshold 
 ![image](https://github.com/user-attachments/assets/a1ec094c-2d1a-41fe-89ae-c45fa0c32cac)
 
 
-The demo in this repo contains two implmentation to perform adaptive thresholding.
+The demo in this repo contains two solutions to perform adaptive thresholding.
 
 * A pure JavaScript solution.
 * A WASM solution based on [Dynamsoft Barcode Reader](https://www.dynamsoft.com/barcode-reader/overview/).
