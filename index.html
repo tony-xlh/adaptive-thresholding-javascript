@@ -204,6 +204,7 @@
     function adaptiveThresholdWithIntegralImage(imageData, blockSize, C) {
       const width = imageData.width;
       const height = imageData.height;
+      convertToGrayScale(imageData);
       const data = imageData.data;
       const output = new ImageData(width, height);
       const outputData = output.data;
@@ -235,6 +236,7 @@
     function adaptiveThreshold(imageData, blockSize, C) {
       const width = imageData.width;
       const height = imageData.height;
+      convertToGrayScale(imageData);
       const data = imageData.data;
       const output = new ImageData(width, height);
       const outputData = output.data;
@@ -267,6 +269,25 @@
         }
       }
       return output;
+    }
+
+    function convertToGrayScale(imageData){
+      const pixels = imageData.data; //[r,g,b,a,...]
+      for (var i = 0; i < pixels.length; i += 4) {
+        const red = pixels[i];
+        const green = pixels[i + 1];
+        const blue = pixels[i + 2];
+        const grayscale = RGBToGrayScale(red, green, blue)
+        pixels[i] = grayscale;
+        pixels[i + 1] = grayscale;
+        pixels[i + 2] = grayscale;
+      }
+    }
+
+    //https://github.com/image-js/image-js/blob/9ab86a86f6c13a9a7d14c62566c1396c3c6f54f4/src/image/transform/greyAlgorithms.js
+    function RGBToGrayScale(red,green,blue){
+      //return red * 0.2126 + green * 0.7152 + blue * 0.0722;
+      return (red * 6966 + green * 23436 + blue * 2366) >> 15;
     }
 
 
